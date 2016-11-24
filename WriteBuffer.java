@@ -3,11 +3,13 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class WriteBuffer
 {
+    MainMemory mainMem;
     public boolean tso;
     public ConcurrentLinkedDeque<Node> buffer;
 
-    public WriteBuffer(boolean tso)
+    public WriteBuffer(boolean tso, MainMemory mainMem)
     {
+        this.mainMem = mainMem;
         this.tso = tso;
         buffer = new ConcurrentLinkedDeque<Node>();
     }
@@ -70,11 +72,16 @@ public class WriteBuffer
     }
 
 
-    /*public void swapAtomic(String x, int v)
-    {
-
-    }*/
-
+    public int swapAtomic(String x, int v) {
+        int tmp;
+        try {
+            tmp = this.load(x);
+        } catch (NotInBufferException e) {
+            tmp = mainMem.load(x);
+        }
+        mainMem.store(x, v);
+        return tmp;
+    }
 
 }
 

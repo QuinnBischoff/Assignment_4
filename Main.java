@@ -15,7 +15,7 @@ public class Main
 
         for(int i=0; i<=9; i++)
         {
-            buffers[i] = new WriteBuffer(true);
+            buffers[i] = new WriteBuffer(true, mainMem);
             memoryAgents[i] = new MemoryAgent(mainMem, buffers[i]);
             processors[i] = new Processor(mainMem, buffers[i], memoryAgents[i], i);
         }
