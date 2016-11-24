@@ -90,7 +90,7 @@ public class Processor extends Thread
             val = writeBuffer.load("globalVariable");
         }
         catch (NotInBufferException e){
-           val = mainMemory.load("globalVariable");
+            val = mainMemory.load("globalVariable");
         }
         val = processorNumber;
         writeBuffer.store("globalVariable", val);
