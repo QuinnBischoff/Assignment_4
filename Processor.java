@@ -16,29 +16,40 @@ public class Processor extends Thread
         this.processorNumber = processorNumber;
     }
 
+    public int getProcessorNumber()
+    {
+        return processorNumber;
+    }
+
     public void run()
     {
-        int i =(int) Thread.currentThread().getId();
-        while(notDead) {
-            petersonEntry(i);
+        while(notDead)
+        {
+            petersonEntry(processorNumber);
             petersonCritical();
-            petersonExit(i);
+            petersonExit(processorNumber);
+
         }
     }
 
     public void petersonEntry(int i)
     {
-        System.out.println("in entry");
-        for(int k=0; k<10; k++)
+        System.out.println("in entry" + processorNumber);
+        for(int k=0; k<10-1; k++)
         {
             writeBuffer.store("flag"+i, k);
             writeBuffer.store("turn"+k, i);
+            try{
+                sleep(3);
+            }catch(InterruptedException e){}
+
             for(int j=0;j<10; j++)
             {
-                if(i==j) continue;
-                while(loopCondition(j,k,i))
+                if(i!=j)
                 {
-                   //nop
+                    while(loopCondition(j, k, i)) {
+                        //nop
+                    }
                 }
             }
         }
@@ -73,7 +84,7 @@ public class Processor extends Thread
 
     public void petersonCritical()
     {
-        System.out.println("in critical");
+        System.out.println("in critical:" + processorNumber);
         int val;
         try {
             val = writeBuffer.load("globalVariable");
@@ -81,13 +92,24 @@ public class Processor extends Thread
         catch (NotInBufferException e){
            val = mainMemory.load("globalVariable");
         }
-        val += 2;
+        val = processorNumber;
         writeBuffer.store("globalVariable", val);
     }
 
 
     public void petersonExit(int i)
     {
+        System.out.println("in exit"+ processorNumber);
         writeBuffer.store("flag"+i, -1);
+    }
+
+    public void swapAtomic(String x, int v)
+    {
+
+    }
+
+    public void kill()
+    {
+        notDead=false;
     }
 }

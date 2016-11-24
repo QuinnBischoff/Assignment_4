@@ -1,7 +1,10 @@
+import java.util.NoSuchElementException;
+
 public class MemoryAgent extends Thread
 {
     MainMemory mainMemory;
     WriteBuffer writeBuffer;
+    boolean notDead = true;
 
     public MemoryAgent(MainMemory mM, WriteBuffer wb)
     {
@@ -13,18 +16,22 @@ public class MemoryAgent extends Thread
     //Flush a pending store in the write-buffer to memory
     public void run()
     {
-        while(true)
+        while(notDead)
         {
-            Node nextVar = writeBuffer.buffer.pollFirst();
-            writeBuffer.lock = true;
-
-            if(nextVar != null)
+            try{
+                sleep(1);
+            }catch(InterruptedException e){}
+            if(!writeBuffer.buffer.isEmpty())
             {
-                nextVar = writeBuffer.buffer.getFirst();
+                Node nextVar = writeBuffer.buffer.poll();
                 mainMemory.store(nextVar.key, nextVar.val);
             }
-
-            writeBuffer.lock = false;
         }
     }
+
+    public void kill()
+    {
+        notDead=false;
+    }
+
 }

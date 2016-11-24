@@ -5,7 +5,6 @@ public class WriteBuffer
 {
     public boolean tso;
     public ConcurrentLinkedDeque<Node> buffer;
-    public boolean lock = false;
 
     public WriteBuffer(boolean tso)
     {
@@ -14,9 +13,9 @@ public class WriteBuffer
     }
 
     //returns value of x read from the buffer, or throws a notinbufferexception
-    public int load(String arg) throws NotInBufferException
+    public synchronized int load(String arg) throws NotInBufferException
     {
-        Iterator<Node> iterator = buffer.iterator();
+        Iterator<Node> iterator = buffer.descendingIterator(); //changed to descending
         while (iterator.hasNext()) {
             Node tempNode = iterator.next();
             if (tempNode.key.equals(arg)) {
@@ -26,7 +25,7 @@ public class WriteBuffer
         throw new NotInBufferException();
     }
 
-    public void store(String x, int v)
+    public synchronized void store(String x, int v)
     {
         Node storeNode = new Node(x,v); //create a new node to hold the data
 
@@ -40,7 +39,7 @@ public class WriteBuffer
             boolean inBuffer = false;
             Iterator<Node> iterator = buffer.iterator();
 
-            while(iterator.hasNext()) {
+           /* while(iterator.hasNext()) {
                 //if the type is already in the deque, add the node to the back of the deque
                 if (storeNode.key.equals(iterator.next().key)) {
                     inBuffer=true;
@@ -52,8 +51,22 @@ public class WriteBuffer
             if(!inBuffer)
             {
                 buffer.addFirst(storeNode);
+            }*/
+            try
+            {
+                this.load(x);
+                buffer.add(storeNode);
+            }
+            catch(NotInBufferException e)
+            {
+                buffer.addFirst(storeNode);
             }
         }
+    }
+
+    public void setToPSOMODE()
+    {
+        tso = false;
     }
 
 

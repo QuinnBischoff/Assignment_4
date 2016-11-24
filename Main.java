@@ -9,11 +9,49 @@ public class Main
         MainMemory mainMem = new MainMemory();
         mainMem.store("globalVariable", 0);
 
-        WriteBuffer writeBuffer1 = new WriteBuffer(true);
-        MemoryAgent memoryAgent1 = new MemoryAgent(mainMem, writeBuffer1);
-        Processor processor1 = new Processor(mainMem, writeBuffer1, memoryAgent1, 0);
-        processor1.start();
-        processor1.notDead=false;
-    }
+        WriteBuffer[] buffers = new WriteBuffer[10];
+        MemoryAgent[] memoryAgents = new MemoryAgent[10];
+        Processor[] processors = new Processor[10];
 
+        for(int i=0; i<=9; i++)
+        {
+            buffers[i] = new WriteBuffer(true);
+            memoryAgents[i] = new MemoryAgent(mainMem, buffers[i]);
+            processors[i] = new Processor(mainMem, buffers[i], memoryAgents[i], i);
+        }
+
+        for(int i=0; i<processors.length; i++)
+        {
+            mainMem.store("flag"+processors[i].getProcessorNumber(), -1);
+            mainMem.store("turn"+processors[i].getProcessorNumber(), -1);
+        }
+
+        System.out.println("Part 2:");
+
+        for(int i=0; i<memoryAgents.length; i++)
+        {
+            memoryAgents[i].start();
+        }
+
+
+        for(int i=0; i<processors.length; i++)
+        {
+            processors[i].start();
+        }
+
+
+
+        /*
+        for(int i=0; i<processors.length; i++)
+        {
+            processors[i].kill();
+        }
+        */
+        /*
+        for(int i=0; i<memoryAgents.length; i++)
+        {
+            memoryAgents[i].kill();
+        }
+        */
+    }
 }
